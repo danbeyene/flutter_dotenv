@@ -80,6 +80,26 @@ class DotEnv {
     _envMap.addAll(envEntries);
     _isInitialized = true;
   }
+    Future<void> loadWeb(
+      {String fileName = 'dotenv',Parser parser = const Parser(),Map<String, String> mergeWith = const {}, bool isOptional = false}) async {
+    clean();
+    List<String> linesFromFile;
+    try {
+      linesFromFile = await _getEntriesFromFile(fileName);
+    } on FileNotFoundError {
+      if (isOptional) {
+        linesFromFile = [];
+      } else {
+        rethrow;
+      }
+    }
+
+    final linesFromMergeWith = mergeWith.entries.map((entry) => "${entry.key}=${entry.value}").toList();
+    final allLines = linesFromMergeWith..addAll(linesFromFile);
+    final envEntries = parser.parse(allLines);
+    _envMap.addAll(envEntries);
+    _isInitialized = true;
+  }
 
   void testLoad(
       {String fileInput = '',
